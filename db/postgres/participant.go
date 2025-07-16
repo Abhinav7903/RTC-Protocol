@@ -5,7 +5,7 @@ import (
 )
 
 // CreateParticipant inserts a participant into a room
-func (p *Postgres) CreateParticipant(roomID, displayName string) (*factory.Participant, error) {
+func (p *Postgres) CreateParticipant(roomID int, displayName string) (*factory.Participant, error) {
 	query := `INSERT INTO room_participants (room_id, display_name) 
 	          VALUES ($1, $2) 
 	          RETURNING id, room_id, display_name, joined_at`
@@ -20,7 +20,7 @@ func (p *Postgres) CreateParticipant(roomID, displayName string) (*factory.Parti
 }
 
 // GetParticipantsByRoom lists all participants for a given room
-func (p *Postgres) GetParticipantsByRoom(roomID string) ([]factory.Participant, error) {
+func (p *Postgres) GetParticipantsByRoom(roomID int) ([]factory.Participant, error) {
 	query := `SELECT id, room_id, display_name, joined_at 
 	          FROM room_participants 
 	          WHERE room_id = $1 
@@ -44,7 +44,7 @@ func (p *Postgres) GetParticipantsByRoom(roomID string) ([]factory.Participant, 
 }
 
 // DeleteParticipant removes a participant by ID
-func (p *Postgres) DeleteParticipant(id string) error {
+func (p *Postgres) DeleteParticipant(id int) error {
 	query := `DELETE FROM room_participants WHERE id = $1`
 	_, err := p.dbConn.Exec(query, id)
 	return err

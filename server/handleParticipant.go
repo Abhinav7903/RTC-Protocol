@@ -3,12 +3,13 @@ package server
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 func (s *Server) handleCreateParticipant() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
-			RoomID      string `json:"room_id"`
+			RoomID      int    `json:"room_id"`
 			DisplayName string `json:"display_name"`
 		}
 
@@ -34,8 +35,14 @@ func (s *Server) handleGetParticipantsByRoom() http.HandlerFunc {
 			s.respond(w, &ResponseMsg{Message: "Missing room_id"}, http.StatusBadRequest, nil)
 			return
 		}
+		// Assuming roomID is an integer, convert it
+		roomIDInt, err := strconv.Atoi(roomID)
+		if err != nil {
+			s.respond(w, &ResponseMsg{Message: "Invalid room_id"}, http.StatusBadRequest, err)
+			return
+		}
 
-		participants, err := s.participantRepo.GetParticipantsByRoom(roomID)
+		participants, err := s.participantRepo.GetParticipantsByRoom(roomIDInt)
 		if err != nil {
 			s.respond(w, &ResponseMsg{Message: "Failed to get participants"}, http.StatusInternalServerError, err)
 			return
@@ -52,7 +59,13 @@ func (s *Server) handleDeleteParticipant() http.HandlerFunc {
 			s.respond(w, &ResponseMsg{Message: "Missing participant ID"}, http.StatusBadRequest, nil)
 			return
 		}
-		err := s.participantRepo.DeleteParticipant(id)
+		// Assuming id is an integer, convert it
+		participantID, err := strconv.Atoi(id)
+		if err != nil {
+			s.respond(w, &ResponseMsg{Message: "Invalid participant ID"}, http.StatusBadRequest, err)
+			return
+		}
+		err = s.participantRepo.DeleteParticipant(participantID)
 		if err != nil {
 			s.respond(w, &ResponseMsg{Message: "Failed to delete participant"}, http.StatusInternalServerError, err)
 			return

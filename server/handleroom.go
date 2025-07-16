@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 func (s *Server) handleCreateRoom() http.HandlerFunc {
@@ -19,6 +21,7 @@ func (s *Server) handleCreateRoom() http.HandlerFunc {
 
 		room, err := s.roomRepo.CreateRoom(req.Name, req.RoomType)
 		if err != nil {
+			logrus.Error("Failed to create room:", err)
 			s.respond(w, &ResponseMsg{Message: "Failed to create room"}, http.StatusInternalServerError, err)
 			return
 		}

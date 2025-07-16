@@ -5,7 +5,7 @@ import (
 )
 
 // CreateSignal stores an offer/answer/candidate for a room
-func (p *Postgres) CreateSignal(roomID, senderID, signalType string, payload []byte) (*factory.Signal, error) {
+func (p *Postgres) CreateSignal(roomID, senderID int, signalType string, payload []byte) (*factory.Signal, error) {
 	query := `INSERT INTO signals (room_id, sender_id, signal_type, signal_payload) 
 	          VALUES ($1, $2, $3, $4) 
 	          RETURNING id, room_id, sender_id, signal_type, signal_payload, created_at`
@@ -21,7 +21,7 @@ func (p *Postgres) CreateSignal(roomID, senderID, signalType string, payload []b
 }
 
 // GetSignalsByRoom fetches all signals for a room (useful for joining late or syncing)
-func (p *Postgres) GetSignalsByRoom(roomID string) ([]factory.Signal, error) {
+func (p *Postgres) GetSignalsByRoom(roomID int) ([]factory.Signal, error) {
 	query := `SELECT id, room_id, sender_id, signal_type, signal_payload, created_at 
 	          FROM signals 
 	          WHERE room_id = $1 
@@ -45,14 +45,15 @@ func (p *Postgres) GetSignalsByRoom(roomID string) ([]factory.Signal, error) {
 	return signals, nil
 }
 
-// DeleteSignalsByRoom optionally clean up all signals when room is removed (though CASCADE already does this)
-func (p *Postgres) DeleteSignalsByRoom(roomID string) error {
+// DeleteSignalsByRoom removes signals for a room
+func (p *Postgres) DeleteSignalsByRoom(roomID int) error {
 	query := `DELETE FROM signals WHERE room_id = $1`
 	_, err := p.dbConn.Exec(query, roomID)
 	return err
 }
 
-func (p *Postgres) GetSignalsByRoomExcludingSender(roomID, senderID string) ([]factory.Signal, error) {
+// GetSignalsByRoomExcludingSender fetches all signals from others in the room
+func (p *Postgres) GetSignalsByRoomExcludingSender(roomID, senderID int) ([]factory.Signal, error) {
 	query := `
 	SELECT id, room_id, sender_id, signal_type, signal_payload, created_at
 	FROM signals
