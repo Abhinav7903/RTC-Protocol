@@ -1,6 +1,7 @@
 -- Create rooms
 CREATE TABLE rooms (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name Text NOT NULL,
   room_type VARCHAR(10) CHECK (room_type IN ('single', 'group')) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

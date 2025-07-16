@@ -3,6 +3,9 @@ package server
 import (
 	"net/http"
 	"rtc/db/postgres"
+	"rtc/pkg/participant"
+	"rtc/pkg/room"
+	"rtc/pkg/signal"
 
 	"github.com/gorilla/mux"
 )
@@ -13,8 +16,11 @@ type ResponseMsg struct {
 }
 
 type Server struct {
-	router   *mux.Router
-	postgres *postgres.Postgres
+	router          *mux.Router
+	postgres        *postgres.Postgres
+	roomRepo        room.RoomRepository
+	signalRepo      signal.SignalRepository
+	participantRepo participant.ParticipantRepository
 }
 
 func (s *Server) RegisterRoutes() {

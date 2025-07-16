@@ -63,8 +63,11 @@ func Run(envType *string) {
 	postgres := postgres.NewPostgres()
 
 	server := &Server{
-		router:   mux.NewRouter(),
-		postgres: postgres,
+		router:          mux.NewRouter(),
+		postgres:        postgres,
+		roomRepo:        postgres,
+		signalRepo:      postgres,
+		participantRepo: postgres,
 	}
 	server.RegisterRoutes()
 
