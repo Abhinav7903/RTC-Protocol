@@ -51,3 +51,27 @@ func (p *Postgres) DeleteSignalsByRoom(roomID string) error {
 	_, err := p.dbConn.Exec(query, roomID)
 	return err
 }
+
+func (p *Postgres) GetSignalsByRoomExcludingSender(roomID, senderID string) ([]factory.Signal, error) {
+	query := `
+	SELECT id, room_id, sender_id, signal_type, signal_payload, created_at
+	FROM signals
+	WHERE room_id = $1 AND sender_id != $2
+	ORDER BY created_at ASC
+	`
+	rows, err := p.dbConn.Query(query, roomID, senderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var signals []factory.Signal
+	for rows.Next() {
+		var s factory.Signal
+		if err := rows.Scan(&s.ID, &s.RoomID, &s.SenderID, &s.SignalType, &s.SignalPayload, &s.CreatedAt); err != nil {
+			return nil, err
+		}
+		signals = append(signals, s)
+	}
+	return signals, nil
+}
